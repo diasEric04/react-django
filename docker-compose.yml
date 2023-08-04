@@ -1,4 +1,4 @@
-version: 3.9
+version: '3.9'
 
 services: 
   backend:
@@ -11,8 +11,8 @@ services:
       - ./backend:/backend
       - ./data/web/static:/data/web/static/
       - ./data/web/media:/data/web/media/
-    env_files:
-      - ./dotenv-files/.env
+    env_file:
+      - ./dotenv_files/.env
     depends_on:
       - psql
   psql:
@@ -21,4 +21,4 @@ services:
     volumes: 
       - ./data/postgres/data:/var/lib/postgresql/data/
     env_file:
-      - ./dotenv-files/.env
+      - ./dotenv_files/.env

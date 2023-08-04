@@ -5,7 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 
 ENV PYTHONUNBUFFERED 1
 
-COPY backend /djangoapp
+COPY backend /backend
 COPY scripts /scripts
 
 WORKDIR /backend
@@ -13,19 +13,19 @@ WORKDIR /backend
 EXPOSE 8000
 
 RUN python -m venv /venv && \
-    /venv/bin/pip install --upgrade pip && \
-    /venv/bin/install -r /backend/requirements.txt && \
-    adduser --disabled=password --no-create-home duser && \
-    mkdir -P /data/web/static && \
-    mkdir -P /data/web/media && \
-    chown -R duser:duser /venv && \
-    chown -R duser:duser /data/web/static && \
-    chown -R duser:duser /data/web/media && \
-    chmod -R 755 /data/web/static && \
-    chmod -R 755 /data/web/media && \
-    chmod -R +x /scripts
+  /venv/bin/pip install --upgrade pip && \
+  /venv/bin/pip install -r /backend/requirements.txt && \
+  adduser --disabled-password --no-create-home duser && \
+  mkdir -p /data/web/static && \
+  mkdir -p /data/web/media && \
+  chown -R duser:duser /venv && \
+  chown -R duser:duser /data/web/static && \
+  chown -R duser:duser /data/web/media && \
+  chmod -R 755 /data/web/static && \
+  chmod -R 755 /data/web/media && \
+  chmod -R +x /scripts
 
-ENV PATH = "/scripts:/venv/bin:$PATH"
+ENV PATH="/scripts:/venv/bin:$PATH"
 
 USER duser
 

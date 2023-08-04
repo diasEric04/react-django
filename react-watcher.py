@@ -70,7 +70,7 @@ def copy_staticfiles(build_dir, django_path):
                 with open(file_path_django, 'r', encoding='utf8') as stylefile:
                     style_text = stylefile.read()
                     new_style_text = CSS_URL_REGEXP.sub(
-                        r'url(/media/react-media/\2)', style_text
+                        r'url(/data/web/media/react-media/\2)', style_text
                     )
                 with open(file_path_django, 'w', encoding='utf8') as stylefile:
                     print(f' 🟡 adjusting url in file "{file}"...')
@@ -86,7 +86,7 @@ def copy_mediafiles(build_dir, django_path):
     STATIC_FILES_REACT = build_dir / 'static'
     MEDIA_FILES_REACT = STATIC_FILES_REACT / 'media'
     DJANGO_ROOT = Path(os.path.dirname(django_path))
-    MEDIA_FILES_DJANGO = DJANGO_ROOT / 'media' / 'react-media'
+    MEDIA_FILES_DJANGO = DJANGO_ROOT / 'data' / 'web' / 'media' / 'react-media'
 
     os.makedirs(MEDIA_FILES_DJANGO)
 
