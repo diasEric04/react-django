@@ -19,6 +19,21 @@ CSS_URL_REGEXP = re.compile(
     r'(url\(\/static\/media\/(.+)\))', flags=re.I
 )
 
+HTML_SCRIPT_TAG_REGEXP = re.compile(
+    r'((<script.*src=["\'])(\/static)(\/.+)(["\']>.*<\/script>))', flags=re.I
+)
+
+HTML_LINK_TAG_REGEXP = re.compile(
+    r'((<link href=["\'])(\/static)(\/.+)(["\'] rel=["\']stylesheet["\']>))',
+    flags=re.I
+)
+HTML_NOSCRIPT_TAG_REGEXP = re.compile(
+     r'<noscript>.*<\/noscript>', flags=re.I
+)
+HTML_DIVROOT_TAG_REGEXP = re.compile(
+     r'<div.*id=["\'].+["\']>.*<\/div>', flags=re.I
+)
+
 
 def build_reactapp(walk_dir, root):
     print(
@@ -86,9 +101,11 @@ def copy_mediafiles(build_dir, django_path):
     STATIC_FILES_REACT = build_dir / 'static'
     MEDIA_FILES_REACT = STATIC_FILES_REACT / 'media'
     DJANGO_ROOT = Path(os.path.dirname(django_path))
-    MEDIA_FILES_DJANGO = DJANGO_ROOT / 'data' / 'web' / 'media' / 'react-media'
+    MEDIA_FILES_DJANGO = (
+        DJANGO_ROOT / '..' / 'data' / 'web' / 'media' / 'react-media'
+    )
 
-    os.makedirs(MEDIA_FILES_DJANGO)
+    os.makedirs(MEDIA_FILES_DJANGO, exist_ok=True)
 
     print(' 🔵 copying media files...')
     for root, dirs, files in os.walk(MEDIA_FILES_REACT):
@@ -115,14 +132,18 @@ def copy_mediafiles(build_dir, django_path):
             copy(file_path_original, file_path_django)
             print(f' 🟡 copying file "{file}"...')
     for item in os.listdir(build_dir):
-        if os.path.isfile(item):
+        item_path = os.path.join(build_dir, item)
+        if os.path.isfile(item_path):
             _, extension = os.path.splitext(item)
-            if not extension == '.html':
-                item_path = os.path.join(build_dir, item)
+            if extension != '.html':
                 new_item_path = os.path.join(MEDIA_FILES_DJANGO, item)
                 copy(item_path, new_item_path)
                 print(f' 🟡 copying file "{item}"...')
-    print(' 🟢 all static files are copied to django app')
+    print(' 🟢 all media files are copied to django app')
+
+
+def django_st_tag(str):
+    return f"{{% static '{str}' %}}"
 
 
 def copy_htmlfiles(build_dir, django_path):
@@ -148,6 +169,47 @@ def copy_htmlfiles(build_dir, django_path):
                 )
                 copy(item_path, new_html_path)
                 print(f' 🟡 copying html "{item}"...')
+
+                with open(new_html_path, 'r', encoding='utf8') as html:
+                    html_text = html.read()
+
+                link_tags = HTML_LINK_TAG_REGEXP.findall(html_text)
+                script_tags = HTML_SCRIPT_TAG_REGEXP.findall(html_text)
+                noscript_tags = HTML_NOSCRIPT_TAG_REGEXP.findall(html_text)
+                divroot = HTML_DIVROOT_TAG_REGEXP.findall(html_text)
+
+                link_tags = [
+                    HTML_LINK_TAG_REGEXP.sub(
+                        r'\2'+django_st_tag(app_name+r'\4')+r'\5', link_tag
+                    ) + '\n'
+                    for link_tag, _, _, _, _ in link_tags
+                ]
+
+                script_tags = [
+                    HTML_SCRIPT_TAG_REGEXP.sub(
+                        r'\2'+django_st_tag(app_name+r'\4')+r'\5', script_tag
+                    ) + '\n'
+                    for script_tag, _, _, _, _ in script_tags
+                ]
+
+                new_html_text = (
+                    f"{{% extends '{app_name}/base.html' %}}\n"
+                    '{% load static %}\n\n'
+
+                    '{% block additional_links %}\n'
+                    f"\t{''.join(script_tags)}"
+                    f"\t{''.join(link_tags)}"
+                    '{% endblock additional_links %}\n\n\n'
+
+
+                    '{% block content %}\n'
+                    f"\t{''.join(noscript_tags)}\n"
+                    f"\t{''.join(divroot)}\n"
+                    '{% endblock content %}\n'
+                )
+
+                with open(new_html_path, 'w', encoding='utf8') as html:
+                    html.write(new_html_text)
     print(' 🟢 all html files are copied to django app')
 
 
