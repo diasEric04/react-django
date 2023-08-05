@@ -18,6 +18,10 @@ CONFIG_DJANGO_KEY = 'django_dir'
 CSS_URL_REGEXP = re.compile(
     r'(url\(\/static\/media\/(.+)\))', flags=re.I
 )
+# "static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg"
+JS_URL_REGEXP = re.compile(
+    r'(["\']static\/media\/(.+)["\'])', flags=re.I
+)
 
 HTML_SCRIPT_TAG_REGEXP = re.compile(
     r'((<script.*src=["\'])(\/static)(\/.+)(["\']>.*<\/script>))', flags=re.I
@@ -65,6 +69,8 @@ def copy_staticfiles(build_dir, django_path):
                 ),
                 dir
             )
+            if os.path.exists(new_dir):
+                rmtree(new_dir)
             os.makedirs(new_dir, exist_ok=True)
             print(f' 🟡 copying dir "{dir}/"...')
 
@@ -79,17 +85,26 @@ def copy_staticfiles(build_dir, django_path):
             )
             copy(file_path_original, file_path_django)
             print(f' 🟡 copying file "{file}"...')
-            _, extesion = os.path.splitext(file)
-            extensions = ['.css', '.scss', '.sass']
-            if extesion in extensions:
+            _, extension = os.path.splitext(file)
+            style_files = ['.css', '.scss', '.sass']
+            if extension in style_files:
                 with open(file_path_django, 'r', encoding='utf8') as stylefile:
                     style_text = stylefile.read()
                     new_style_text = CSS_URL_REGEXP.sub(
-                        r'url(/data/web/media/react-media/\2)', style_text
+                        r'url(/media/react-media/\2)', style_text
                     )
                 with open(file_path_django, 'w', encoding='utf8') as stylefile:
                     print(f' 🟡 adjusting url in file "{file}"...')
                     stylefile.write(new_style_text)
+            elif extension == '.js':
+                with open(file_path_django, 'r', encoding='utf8') as jsfile:
+                    js_text = jsfile.read()
+                    new_js_text = JS_URL_REGEXP.sub(
+                        r'"media/react-media/\2"', js_text
+                    )
+                with open(file_path_django, 'w', encoding='utf8') as jsfile:
+                    print(f' 🟡 adjusting url in file "{file}"...')
+                    jsfile.write(new_js_text)
     print(' 🔴 removing media dir from static files (django app...)')
     django_static_media_path = os.path.join(STATIC_FILES_DJANGO, 'media')
     if os.path.exists(django_static_media_path):

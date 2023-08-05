@@ -116,9 +116,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
@@ -132,7 +132,7 @@ STATIC_URL = 'static/'
 # /data/web/static
 STATIC_ROOT = DATA_DIR / 'static'
 
-MEDIA_URL = '/media/'
+MEDIA_URL = 'media/'
 # /data/web/media
 MEDIA_ROOT = DATA_DIR / 'media'
 
