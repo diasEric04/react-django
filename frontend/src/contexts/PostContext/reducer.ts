@@ -9,13 +9,8 @@ export const reducer : ReducerType = (state, action) => {
         case types.END_GET:
             return {...state, loading: false}
 
-        case types.GET:
-            // get dados da api
-            return {...state}
-        
-        case types.POST:
-            // post de dados da api
-            return {...state}
+        case types.SET_POSTS:
+            return {...state, posts: action.payload ?? []}
     }
 
     return {...state}

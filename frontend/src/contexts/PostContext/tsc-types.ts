@@ -1,13 +1,17 @@
 import { ReactElement, ReactNode, Dispatch } from 'react'
 
-interface PostType {
+export interface PostType {
     title: string
     description: string
-    author: string
+    created_by: string
+    updated_by: string
+    updated_at: string
+    created_at: string
     content: string
 }
 export interface ActionType {
     type: string,
+    payload? : PostType[] | undefined
 }
 
 export interface StateType {
@@ -16,7 +20,7 @@ export interface StateType {
 }
 
 export interface FactoryActionsType {
-    [key:string] : () => void
+    [key:string] : (post? : PostType[]) => void
 }
 
 export interface ContextType {

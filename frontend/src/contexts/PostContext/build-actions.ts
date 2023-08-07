@@ -3,7 +3,8 @@ import * as actionTypes from './action-type'
 
 export const buildActions: BuildActionsType = ( dispatch ) => {
     return {
-        get: () => dispatch({type: actionTypes.GET}),
-        post: () => dispatch({type: actionTypes.POST})
+        setPosts: (posts) => dispatch({type: actionTypes.SET_POSTS, payload: posts}),
+        startGet: () => dispatch({type: actionTypes.START_GET}),
+        endGet: () => dispatch({type: actionTypes.END_GET}),
     }
 }
